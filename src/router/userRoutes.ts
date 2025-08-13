@@ -1,13 +1,18 @@
 import { Router } from "express";
-import { registerUser, loginUser } from "../controllers/user/usercontroller";
+import { registerUser, loginUser, updateProfile } from "../controllers/user/usercontroller";
 import { addPosition, deletePosition, getApplicationsByPosition, updateApplicationStatus, updatePosition } from "../controllers/aplly/applicationController";
 import { authenticate, authorize } from "../middleware/authMiddleware";
+import { validate } from "../middleware/validate";
+import { loginSchema, registerSchema, updateUserSchema } from "../validation/user.validation";
 
 const router = Router();
 
 // Registrasi & Login
-router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/register", validate(registerSchema), registerUser);
+router.post("/login", validate(loginSchema), loginUser);
+
+//Update Profile
+router.put("/update-profile/:id", authenticate, validate(updateUserSchema), updateProfile);
 
 // Tambah posisi (HRD only)
 router.post("/positions", authenticate, authorize("HRD"), addPosition);

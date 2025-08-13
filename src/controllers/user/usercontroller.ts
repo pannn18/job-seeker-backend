@@ -122,3 +122,44 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 };
+
+  export const updateProfile = async (req: Request, res: Response) => {
+    try {
+
+      const id = req.params.id
+
+      const existing = await prisma.user.findFirst({
+        where: {
+          id: Number(id)
+        }
+      })
+
+      if (!existing) {
+        return res.status(404).json({ message: "User tidak ditemukan" });
+      }
+
+      const { name, email, password } = req.body;
+
+      const updatedUser = await prisma.user.update({
+        where: {id: Number(id)},
+        data: {
+          name: name ?? existing?.name,
+          email: email ?? existing?.email,
+          password: password ? await bcrypt.hash(password, 12) : existing?.password,
+        },
+      })
+
+      if(!updatedUser) {
+        return res.status(400).json({ message: "Gagal memperbarui profil" });
+      }
+
+      res.status(200).json({
+        message: "Profil berhasil diperbarui",
+        data: updatedUser
+      });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Terjadi kesalahan server" });
+    }
+  }
