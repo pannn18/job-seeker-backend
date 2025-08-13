@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(100)
+  email    String    @unique(map: "email") @db.VarChar(100)
+  password String    @db.VarChar(255)
+  role     Role
+  company  Company[]
+  society  Society[]
+
+  @@map("users")
+}
+
+model Company {
+  id                 Int                 @id @default(autoincrement())
+  name               String              @db.VarChar(100)
+  address            String              @db.VarChar(255)
+  phone              String              @db.VarChar(20)
+  description        String              @db.Text
+  userId             Int                 @map("user_id")
+  availablePositions AvailablePosition[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "company_ibfk_1")
+
+  @@index([userId], map: "user_id")
+  @@map("company")
+}
+
+model Society {
+  id           Int               @id @default(autoincrement())
+  name         String            @db.VarChar(100)
+  address      String            @db.VarChar(255)
+  phone        String            @db.VarChar(20)
+  dateOfBirth  DateTime          @map("date_of_birth") @db.Date
+  gender       String            @db.VarChar(10)
+  userId       Int               @map("user_id")
+  portfolios   Portofolio[]
+  applications PositionApplied[]
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "society_ibfk_1")
+
+  @@index([userId], map: "user_id")
+  @@map("society")
+}
+
+model Portofolio {
+  id          Int     @id @default(autoincrement())
+  skill       String  @db.VarChar(100)
+  description String  @db.Text
+  file        String  @db.VarChar(255)
+  societyId   Int     @map("society_id")
+  society     Society @relation(fields: [societyId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "portofolio_ibfk_1")
+
+  @@index([societyId], map: "society_id")
+  @@map("portofolio")
+}
+
+model AvailablePosition {
+  id                  Int               @id @default(autoincrement())
+  positionName        String            @map("position_name") @db.VarChar(100)
+  capacity            Int
+  description         String            @db.Text
+  submissionStartDate DateTime          @map("submission_start_date") @db.Date
+  submissionEndDate   DateTime          @map("submission_end_date") @db.Date
+  companyId           Int               @map("company_id")
+  company             Company           @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "available_position_ibfk_1")
+  applications        PositionApplied[]
+
+  @@index([companyId], map: "company_id")
+  @@map("available_position")
+}
+
+model PositionApplied {
+  id                  Int                @id @default(autoincrement())
+  availablePositionId Int                @map("available_position_id")
+  societyId           Int                @map("society_id")
+  applyDate           DateTime           @map("apply_date") @db.Date
+  status              ApplicationStatus? @default(PENDING)
+  availablePosition   AvailablePosition  @relation(fields: [availablePositionId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "position_applied_ibfk_1")
+  society             Society            @relation(fields: [societyId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "position_applied_ibfk_2")
+
+  @@index([availablePositionId], map: "available_position_id")
+  @@index([societyId], map: "society_id")
+  @@map("position_applied")
+}
+
+enum Role {
+  HRD
+  Society
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
