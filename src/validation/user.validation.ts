@@ -33,7 +33,6 @@ export const registerSchema = Joi.object({
     .pattern(/^[0-9]{8,15}$/)
     .when("role", { is: "Society", then: Joi.required(), otherwise: Joi.forbidden() }),
   dateOfBirth: Joi.date()
-    .less("now")
     .when("role", { is: "Society", then: Joi.required(), otherwise: Joi.forbidden() }),
   gender: Joi.string()
     .valid("Male", "Female")

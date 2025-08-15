@@ -1,18 +1,15 @@
 import { Router } from "express";
-import { registerUser, loginUser, updateProfile } from "../../controllers/user/usercontroller";
-import { addPosition, deletePosition, getApplicationsByPosition, updateApplicationStatus, updatePosition } from "../../controllers/aplly/applicationController";
+import { registerUser, loginUser, updateProfile, getProfile, deleteProfile } from "../../controllers/user/usercontroller";
 import { authenticate, authorize } from "../../middleware/authMiddleware";
 import { validate } from "../../middleware/validate";
 import { loginSchema, registerSchema, updateUserSchema } from "../../validation/user.validation";
 
 const router = Router();
 
-// Registrasi & Login
-router.post("/register-society", authorize("SOCIETY"), validate(registerSchema), registerUser);
-router.post("/login-society", authorize("SOCIETY"), validate(loginSchema), loginUser);
-
-//Update Profile
-router.put("/update-profile/:id", authenticate, validate(updateUserSchema), updateProfile);
-
+router.post("/register-society", validate(registerSchema), registerUser);
+router.post("/login-society", validate(loginSchema), loginUser);
+router.put("/update-profile/:id", authenticate, authorize("Society"), validate(updateUserSchema), updateProfile);
+router.get("/profile-society/:id", authenticate, authorize("Society"), getProfile);
+router.delete("/delete-profile/:id", authenticate, authorize("Society"), deleteProfile);
 
 export default router;

@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import HrdRoutes from "./router/hrd/hrd.route";
-import societyRoutes from "./router/applyRoutes";
+import societyRoutes from "./router/society/society.route";
 
 dotenv.config();
 

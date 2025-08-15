@@ -163,3 +163,70 @@ export const loginUser = async (req: Request, res: Response) => {
       res.status(500).json({ message: "Terjadi kesalahan server" });
     }
   }
+
+  export const getProfile = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+
+      const UserNotFound = await prisma.user.findFirst({
+        where: {
+          id: Number(id)
+        }
+      })
+
+      if (!UserNotFound) {
+        return res.status(404).json({ message: "User tidak ditemukan" });
+      }
+      
+      const getProfile = await prisma.user.findFirst({
+        where: {
+          id: Number(id)
+        },
+        include: {
+          company: true,
+          society: true
+        }
+      })
+
+      if (!getProfile) {
+        return res.status(404).json({ message: "User tidak ditemukan" });
+      }
+
+      res.status(200).json({
+        message: "Profil berhasil ditemukan",
+        data: getProfile
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Terjadi kesalahan server" });
+    }
+  }
+
+  export const deleteProfile = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        const existing = await prisma.user.findFirst({
+          where: {
+            id: Number(id)
+          }
+        })
+
+        if (!existing) {
+          return res.status(404).json({ message: "User tidak ditemukan" });
+        }
+
+        await prisma.user.delete({
+          where: {
+            id: Number(id)
+          }
+        })
+
+        res.status(200).json({ message: "Profil berhasil dihapus" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Terjadi kesalahan server" });
+    }
+  }
+
+  
