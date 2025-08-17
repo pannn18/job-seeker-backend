@@ -1,15 +1,13 @@
-import { Router } from "express";
-import { registerUser, loginUser, updateProfile, getProfile, deleteProfile } from "../../controllers/user/usercontroller";
-import { authenticate, authorize } from "../../middleware/authMiddleware";
+import express from "express";
 import { validate } from "../../middleware/validate";
-import { loginSchema, registerSchema, updateUserSchema } from "../../validation/user.validation";
+import { createSocietySchema, societyIdSchema, updateSocietySchema } from "../../validation/society.validation";
+import { createSociety, updateSociety } from "../../controllers/society/societyController";
 
-const router = Router();
 
-router.post("/register-society", validate(registerSchema), registerUser);
-router.post("/login-society", validate(loginSchema), loginUser);
-router.put("/update-profile/:id", authenticate, authorize("Society"), validate(updateUserSchema), updateProfile);
-router.get("/profile-society/:id", authenticate, authorize("Society"), getProfile);
-router.delete("/delete-profile/:id", authenticate, authorize("Society"), deleteProfile);
+const router = express.Router();
+
+router.post("/add-society", validate(createSocietySchema), createSociety);
+router.get("/:id", validate(societyIdSchema), );
+router.put("/:id", validate(updateSocietySchema), updateSociety);
 
 export default router;

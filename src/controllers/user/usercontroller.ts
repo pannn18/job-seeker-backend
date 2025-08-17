@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
@@ -9,12 +9,11 @@ export const registerUser = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Validasi role harus HRD atau Society
-    if (!["HRD", "Society"].includes(role)) {
+    const allowed = ["HRD", "Society"] as const;
+    if (role !== undefined && !allowed.includes(role)) {
       return res.status(400).json({ message: "Role tidak valid" });
     }
 
-    // Cek email sudah ada atau belum
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: "Email sudah digunakan" });
@@ -22,17 +21,32 @@ export const registerUser = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let newUser;
+    if (role === undefined) {
+      const user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword
+        },
+      });
+
+      return res.status(201).json({
+        message:
+          "User berhasil registrasi tanpa role. Lengkapi profil lewat endpoint /society atau /HRD.",
+        data: user,
+      });
+    }
 
     if (role === "HRD") {
-      const { companyName, companyAddress, companyPhone, companyDescription } = req.body;
+      const { companyName, companyAddress, companyPhone, companyDescription } =
+        req.body;
 
-      newUser = await prisma.user.create({
+      const newUser = await prisma.user.create({
         data: {
           name,
           email,
           password: hashedPassword,
-          role,
+          role: "HRD" as Role,
           company: {
             create: {
               name: companyName,
@@ -42,20 +56,24 @@ export const registerUser = async (req: Request, res: Response) => {
             },
           },
         },
-        include: {
-          company: true,
-        },
+        include: { company: true },
       });
-    } else if (role === "Society") {
-      // Data tambahan masyarakat
+
+      return res.status(201).json({
+        message: "HRD berhasil registrasi",
+        data: newUser,
+      });
+    }
+
+    if (role === "Society") {
       const { address, phone, dateOfBirth, gender } = req.body;
 
-      newUser = await prisma.user.create({
+      const newUser = await prisma.user.create({
         data: {
           name,
           email,
           password: hashedPassword,
-          role,
+          role: "Society" as Role,
           society: {
             create: {
               name,
@@ -66,16 +84,14 @@ export const registerUser = async (req: Request, res: Response) => {
             },
           },
         },
-        include: {
-          society: true,
-        },
+        include: { society: true },
+      });
+
+      return res.status(201).json({
+        message: "Society berhasil registrasi",
+        data: newUser,
       });
     }
-
-    res.status(201).json({
-      message: `${role} berhasil registrasi`,
-      data: newUser,
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Terjadi kesalahan server" });
@@ -86,10 +102,6 @@ export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password, role } = req.body;
 
-    if (!["HRD", "Society"].includes(role)) {
-      return res.status(400).json({ message: "Role tidak valid" });
-    }
-
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -98,13 +110,31 @@ export const loginUser = async (req: Request, res: Response) => {
       },
     });
 
-    if (!user || user.role !== role) {
+    if (!user) {
       return res.status(400).json({ message: "Email atau password salah" });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(400).json({ message: "Email atau password salah" });
+    }
+
+    if (!user.role) {
+      const token = jwt.sign(
+        { id: user.id, role: null },
+        process.env.JWT_SECRET || "secretkey",
+        { expiresIn: "1d" }
+      );
+
+      return res.status(200).json({
+        message: "Login berhasil (role masih kosong)",
+        token,
+        data: user,
+      });
+    }
+
+    if (role && user.role !== role) {
+      return res.status(400).json({ message: "Role tidak sesuai dengan user" });
     }
 
     const token = jwt.sign(
@@ -115,7 +145,8 @@ export const loginUser = async (req: Request, res: Response) => {
 
     res.status(200).json({
       message: "Login berhasil",
-      token
+      token,
+      data: user,
     });
   } catch (error) {
     console.error(error);
@@ -184,7 +215,7 @@ export const loginUser = async (req: Request, res: Response) => {
         },
         include: {
           company: true,
-          society: true
+          society: true,
         }
       })
 

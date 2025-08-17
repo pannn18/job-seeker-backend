@@ -7,6 +7,16 @@ export const createPortofolio = async (req: Request, res: Response) => {
   try {
     const { skill, description, societyId } = req.body;
 
+        const PortofolioExists = await prisma.portofolio.findFirst({
+      where: {
+        societyId: Number(societyId),
+      },
+    })
+
+    if (PortofolioExists) {
+      return res.status(400).json({ message: "Portofolio sudah ada" });
+    }
+
     const society = await prisma.society.findUnique({
       where: { id: Number(societyId) }
     });
@@ -15,14 +25,10 @@ export const createPortofolio = async (req: Request, res: Response) => {
       return res.status(400).json({ message: `Society ID ${societyId} tidak ditemukan` });
     }
 
-
-    // 2. Simpan file (pastikan pakai multer.single("file"))
     const fileName = req.file ? req.file.filename : null;
     if (!fileName) {
       return res.status(400).json({ message: "File is required" });
     }
-
-    // 3. Simpan ke database
     const portofolio = await prisma.portofolio.create({
       data: {
         skill,
@@ -56,11 +62,35 @@ export const getAllPortofolio = async (req: Request, res: Response) => {
 
 export const getPortofolioById = async (req: Request, res: Response) => {
   try {
-    const data = await prisma.portofolio.findUnique({
-      where: { id: Number(req.params.id) },
+
+    const id = req.params.id;
+
+    const PortofolioNotFound = await prisma.portofolio.findFirst({
+      where: {
+        id: Number(id)
+      }
+    })
+
+    if (!PortofolioNotFound) {
+      return res.status(404).json({ message: "Portofolio tidak ditemukan" });
+    }
+
+    const getPortofolioId = await prisma.portofolio.findFirst({
+      where: {
+        id: Number(id)
+      },
     });
-    if (!data) return res.status(404).json({ message: "Not found" });
-    res.json(data);
+
+    if (!getPortofolioId) {
+      return res.status(404).json({ message: "Portofolio tidak ditemukan" });
+    }
+
+    res.status(200).json({
+      message: "Portofolio berhasil ditemukan",
+      data: getPortofolioId,
+    });
+
+
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err });
   }
