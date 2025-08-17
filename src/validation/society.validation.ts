@@ -1,4 +1,5 @@
 // validation/society.validation.ts
+import e from "express";
 import Joi from "joi";
 
 // CREATE Society
