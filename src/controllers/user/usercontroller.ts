@@ -159,7 +159,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
       const id = req.params.id
 
-      const existing = await prisma.user.findFirst({
+      const existing = await prisma.user.findUnique({
         where: {
           id: Number(id)
         }
@@ -199,7 +199,7 @@ export const loginUser = async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
 
-      const UserNotFound = await prisma.user.findFirst({
+      const UserNotFound = await prisma.user.findUnique({
         where: {
           id: Number(id)
         }
@@ -209,7 +209,7 @@ export const loginUser = async (req: Request, res: Response) => {
         return res.status(404).json({ message: "User tidak ditemukan" });
       }
       
-      const getProfile = await prisma.user.findFirst({
+      const getProfile = await prisma.user.findUnique({
         where: {
           id: Number(id)
         },
@@ -237,7 +237,7 @@ export const loginUser = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
 
-        const existing = await prisma.user.findFirst({
+        const existing = await prisma.user.findUnique({
           where: {
             id: Number(id)
           }
