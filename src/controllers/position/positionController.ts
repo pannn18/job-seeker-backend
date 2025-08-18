@@ -3,9 +3,6 @@ import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-/**
- * ✅ CREATE AvailablePosition (HRD only)
- */
 export const createAvailablePosition = async (req: Request, res: Response) => {
   try {
     const { id, role } = (req as any).user; // asumsi dari JWT middleware
@@ -44,9 +41,6 @@ export const createAvailablePosition = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * ✅ READ All AvailablePosition (umum, bisa HRD / Society)
- */
 export const getAvailablePositions = async (_req: Request, res: Response) => {
   try {
     const positions = await prisma.availablePosition.findMany({
@@ -59,9 +53,6 @@ export const getAvailablePositions = async (_req: Request, res: Response) => {
   }
 };
 
-/**
- * ✅ READ Detail AvailablePosition
- */
 export const getAvailablePositionById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -82,9 +73,6 @@ export const getAvailablePositionById = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * ✅ UPDATE AvailablePosition (HRD only, hanya boleh update posisi miliknya)
- */
 export const updateAvailablePosition = async (req: Request, res: Response) => {
   try {
     const { id: userId, role } = (req as any).user;
@@ -121,9 +109,6 @@ export const updateAvailablePosition = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * ✅ DELETE AvailablePosition (HRD only, hanya bisa hapus miliknya)
- */
 export const deleteAvailablePosition = async (req: Request, res: Response) => {
   try {
     const { id: userId, role } = (req as any).user;

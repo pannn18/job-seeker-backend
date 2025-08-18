@@ -6,6 +6,7 @@ import userRoutes from "./router/user (public)/user.route";
 import societyRoutes from "./router/society/society.route"
 import PortofolioRoutes from "./router/portofolio/portofolio.router";
 import positionRoutes from "./router/position/position.router"
+import PositionAppliedRoutes from "./router/positionApply/positionApp.routes";
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ app.use("/society", societyRoutes);
 
 app.use("/position", positionRoutes);
 
-app.use
+app.use("/position-applied", PositionAppliedRoutes);
 
 app.use("/portofolio", PortofolioRoutes);
 
