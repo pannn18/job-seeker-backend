@@ -7,10 +7,10 @@ import { createAvailablePosition, deleteAvailablePosition, getAvailablePositionB
 
 const router = Router();
 
-router.post("/", authenticate, authorize("HRD"), validate(createAvailablePositionSchema),createAvailablePosition);
-router.get("/", authenticate, getAvailablePositions);
-router.get("/:id",getAvailablePositionById);
-router.put("/:id", authenticate, authorize("HRD"), validate(updateAvailablePositionSchema), updateAvailablePosition);
+router.post("/add-position", authenticate, authorize("HRD"), validate(createAvailablePositionSchema),createAvailablePosition);
+router.get("/position-view", getAvailablePositions);
+router.get("/position-view/:id", authenticate, getAvailablePositionById);
+router.put("/update-position/:id", authenticate, authorize("HRD"), validate(updateAvailablePositionSchema), updateAvailablePosition);
 router.delete("/:id", authenticate, authorize("HRD"), deleteAvailablePosition);
 
 export default router;

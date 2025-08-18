@@ -5,6 +5,7 @@ import HrdRoutes from "./router/hrd/hrd.route";
 import userRoutes from "./router/user (public)/user.route";
 import societyRoutes from "./router/society/society.route"
 import PortofolioRoutes from "./router/portofolio/portofolio.router";
+import positionRoutes from "./router/position/position.router"
 
 dotenv.config();
 
@@ -19,6 +20,8 @@ app.use("/hrd", HrdRoutes);
 app.use("/user", userRoutes);
 
 app.use("/society", societyRoutes);
+
+app.use("/position", positionRoutes);
 
 app.use
 
